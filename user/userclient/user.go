@@ -16,11 +16,13 @@ type (
 	IdRequest    = user.IdRequest
 	Request      = user.Request
 	Response     = user.Response
+	UserRequest  = user.UserRequest
 	UserResponse = user.UserResponse
 
 	User interface {
-		GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+		GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
+		SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	}
 
 	defaultUser struct {
@@ -34,12 +36,17 @@ func NewUser(cli zrpc.Client) User {
 	}
 }
 
+func (m *defaultUser) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+	client := user.NewUserClient(m.cli.Conn())
+	return client.Ping(ctx, in, opts...)
+}
+
 func (m *defaultUser) GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	client := user.NewUserClient(m.cli.Conn())
 	return client.GetUser(ctx, in, opts...)
 }
 
-func (m *defaultUser) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (m *defaultUser) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	client := user.NewUserClient(m.cli.Conn())
-	return client.Ping(ctx, in, opts...)
+	return client.SaveUser(ctx, in, opts...)
 }

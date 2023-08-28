@@ -14,6 +14,12 @@ message Response {
 message IdRequest {
   string id = 1;
 }
+message UserRequest {
+  // 用户名称
+  string name = 1;
+  // 用户性别
+  string gender = 2;
+}
 
 message UserResponse {
   // 用户id
@@ -25,6 +31,7 @@ message UserResponse {
 }
 
 service User {
-  rpc getUser(IdRequest) returns(UserResponse);
   rpc Ping(Request) returns(Response);
+  rpc getUser(IdRequest) returns(UserResponse);
+  rpc SaveUser(UserRequest) returns(UserResponse);
 }

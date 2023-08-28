@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-
 	"go-zero/mall/user/internal/svc"
 	"go-zero/mall/user/types/user"
 
