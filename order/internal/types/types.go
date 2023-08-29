@@ -19,3 +19,13 @@ type OrderReply struct {
 	UserName string `json:"userName"`
 	Gender   string `json:"Gender"`
 }
+
+type UserReq struct {
+	Id string `path:"id"`
+}
+
+type UserReply struct {
+	Id       string `json:"id"`
+	UserName string `json:"userName"`
+	Gender   string `json:"Gender"`
+}

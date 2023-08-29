@@ -17,6 +17,15 @@ type (
 		UserName string `json:"userName"`
 		Gender   string `json:"Gender"`
 	}
+	UserReq {
+		Id string `path:"id"`
+	}
+
+	UserReply {
+		Id       string `json:"id"`
+		UserName string `json:"userName"`
+		Gender   string `json:"Gender"`
+	}
 )
 
 service order-api {
@@ -24,4 +33,6 @@ service order-api {
 	get /from/:name(Request) returns (Response)
 	@handler GetOrder
 	get /api/order/get/:id (OrderReq) returns (OrderReply)
+	@handler GetUser
+	get /api/user/get/:id (UserReq) returns (UserReply)
 }

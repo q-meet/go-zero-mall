@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	User_Ping_FullMethodName     = "/user.User/Ping"
 	User_GetUser_FullMethodName  = "/user.User/getUser"
+	User_Login_FullMethodName    = "/user.User/Login"
 	User_SaveUser_FullMethodName = "/user.User/SaveUser"
 )
 
@@ -30,6 +31,7 @@ const (
 type UserClient interface {
 	Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 	GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
@@ -59,6 +61,15 @@ func (c *userClient) GetUser(ctx context.Context, in *IdRequest, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *userClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, User_Login_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userClient) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, User_SaveUser_FullMethodName, in, out, opts...)
@@ -74,6 +85,7 @@ func (c *userClient) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc
 type UserServer interface {
 	Ping(context.Context, *Request) (*Response, error)
 	GetUser(context.Context, *IdRequest) (*UserResponse, error)
+	Login(context.Context, *LoginRequest) (*UserResponse, error)
 	SaveUser(context.Context, *UserRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
@@ -87,6 +99,9 @@ func (UnimplementedUserServer) Ping(context.Context, *Request) (*Response, error
 }
 func (UnimplementedUserServer) GetUser(context.Context, *IdRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUserServer) Login(context.Context, *LoginRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedUserServer) SaveUser(context.Context, *UserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveUser not implemented")
@@ -140,6 +155,24 @@ func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _User_SaveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserRequest)
 	if err := dec(in); err != nil {
@@ -172,6 +205,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getUser",
 			Handler:    _User_GetUser_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _User_Login_Handler,
 		},
 		{
 			MethodName: "SaveUser",

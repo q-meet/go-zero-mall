@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	util2 "go-zero/mall/order/internal/util"
 	"go-zero/mall/user/types/user"
 	"time"
 
@@ -27,10 +28,15 @@ func NewOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OrderLogic 
 }
 
 func (l *OrderLogic) Order(req *types.Request) (resp *types.Response, err error) {
+	genderRand := util2.Rand(1, 2)
+	gender := "woman"
+	if genderRand == 1 {
+		gender = "man"
+	}
 	// todo: add your logic here and delete this line
 	saveUser, err := l.svcCtx.UserRpc.SaveUser(l.ctx, &user.UserRequest{
 		Name:   fmt.Sprintf("yy_%d_%s", time.Now().Unix(), req.Name),
-		Gender: "woman",
+		Gender: gender,
 	})
 	if err != nil {
 		return nil, err

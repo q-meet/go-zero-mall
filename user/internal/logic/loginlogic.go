@@ -10,32 +10,31 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetUserLogic struct {
+type LoginLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLogic {
-	return &GetUserLogic{
+func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic {
+	return &LoginLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *GetUserLogic) GetUser(in *user.IdRequest) (*user.UserResponse, error) {
+func (l *LoginLogic) Login(in *user.LoginRequest) (*user.UserResponse, error) {
 	// todo: add your logic here and delete this line
-	if in.Id == "1" {
+	if in.Name == "yy_1693215703_me" {
 		return nil, errors.New("id参数不正确")
 	}
-	id, _ := strconv.ParseInt(in.Id, 10, 64)
-	userData, err := l.svcCtx.UserRepo.FindById(context.Background(), id)
+	userData, err := l.svcCtx.UserRepo.FindByName(context.Background(), in.Name)
 	if err != nil {
 		return nil, err
 	}
 	return &user.UserResponse{
-		Id:     in.GetId(),
+		Id:     strconv.FormatInt(userData.Id, 10),
 		Name:   userData.Name,
 		Gender: userData.Gender,
 	}, nil

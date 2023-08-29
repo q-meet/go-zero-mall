@@ -14,6 +14,6 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:   c,
-		UserRepo: dao.NewUserDao(database.Connect(c.Mysql.DataSource)),
+		UserRepo: dao.NewUserDao(database.Connect(c.Mysql.DataSource, c.CacheRedis)),
 	}
 }

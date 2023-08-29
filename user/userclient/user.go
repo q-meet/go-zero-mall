@@ -14,6 +14,7 @@ import (
 
 type (
 	IdRequest    = user.IdRequest
+	LoginRequest = user.LoginRequest
 	Request      = user.Request
 	Response     = user.Response
 	UserRequest  = user.UserRequest
@@ -22,6 +23,7 @@ type (
 	User interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 		GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
+		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error)
 		SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	}
 
@@ -44,6 +46,11 @@ func (m *defaultUser) Ping(ctx context.Context, in *Request, opts ...grpc.CallOp
 func (m *defaultUser) GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	client := user.NewUserClient(m.cli.Conn())
 	return client.GetUser(ctx, in, opts...)
+}
+
+func (m *defaultUser) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	client := user.NewUserClient(m.cli.Conn())
+	return client.Login(ctx, in, opts...)
 }
 
 func (m *defaultUser) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
