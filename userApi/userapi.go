@@ -27,6 +27,7 @@ func main() {
 
 	//writer, err := zapx.NewZapWriter()
 	writer, err := zapx.InitLogger()
+	//writer, err := zapx.NewCore()
 	logx.Must(err)
 	logx.SetWriter(writer)
 

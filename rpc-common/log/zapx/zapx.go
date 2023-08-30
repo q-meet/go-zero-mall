@@ -41,6 +41,7 @@ func (w *ZapWriter) Error(v interface{}, fields ...logx.LogField) {
 }
 
 func (w *ZapWriter) Info(v interface{}, fields ...logx.LogField) {
+	//w.logger.Info(fmt.Sprint(v), toZapFields(fields...)...)
 	w.logger.Info(fmt.Sprint(v), toZapFields(fields...)...)
 }
 

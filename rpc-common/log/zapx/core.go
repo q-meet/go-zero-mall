@@ -1,6 +1,8 @@
 package zapx
 
 import (
+	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -25,10 +27,11 @@ type Log struct {
 	enableColor bool
 	jsonFormat  bool
 	logMinLevel zapcore.Level
+	logger      *zap.Logger
 }
 
 func NewLog() (*Log, error) {
-	return &Log{
+	r := &Log{
 		logDir:      "./log",
 		logFileName: "userApi.log",
 		logMaxSize:  512,
@@ -36,11 +39,29 @@ func NewLog() (*Log, error) {
 		localTime:   true,
 		logCompress: false,
 		stdout:      false,
-		traceId:     "",
+		traceId:     "111",
 		enableColor: true,
 		jsonFormat:  true,
 		logMinLevel: zapcore.DebugLevel,
-	}, nil
+	}
+	r.logger = zap.New(initCore(r), zap.AddCaller())
+
+	sugar := r.logger.Sugar()
+	sugar.Infow("failed to fetch URL",
+		"url", "sougou.com",
+		"attempt", 3,
+		"backoff", time.Second,
+	)
+	return r, nil
+}
+
+func NewCore() (logx.Writer, error) {
+	logger, err := NewLog()
+	if err != nil {
+		return nil, err
+	}
+
+	return logger, nil
 }
 
 func initCore(l *Log) zapcore.Core {
@@ -102,4 +123,48 @@ func initCore(l *Log) zapcore.Core {
 
 	return zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConf),
 		syncWriter, zap.NewAtomicLevelAt(l.logMinLevel))
+}
+
+func (w *Log) Alert(v interface{}) {
+	w.logger.Error(fmt.Sprint(v))
+}
+
+func (w *Log) Close() error {
+	return w.logger.Sync()
+}
+
+func (w *Log) Debug(v interface{}, fields ...logx.LogField) {
+	w.logger.Debug(fmt.Sprint(v), toZapCoreFields(fields...)...)
+}
+
+func (w *Log) Error(v interface{}, fields ...logx.LogField) {
+	w.logger.Error(fmt.Sprint(v), toZapCoreFields(fields...)...)
+}
+
+func (w *Log) Info(v interface{}, fields ...logx.LogField) {
+	w.logger.Info(fmt.Sprint(v), toZapCoreFields(fields...)...)
+}
+
+func (w *Log) Severe(v interface{}) {
+	w.logger.Fatal(fmt.Sprint(v))
+}
+
+func (w *Log) Slow(v interface{}, fields ...logx.LogField) {
+	w.logger.Warn(fmt.Sprint(v), toZapCoreFields(fields...)...)
+}
+
+func (w *Log) Stack(v interface{}) {
+	w.logger.Error(fmt.Sprint(v), zap.Stack("stack"))
+}
+
+func (w *Log) Stat(v interface{}, fields ...logx.LogField) {
+	w.logger.Info(fmt.Sprint(v), toZapCoreFields(fields...)...)
+}
+
+func toZapCoreFields(fields ...logx.LogField) []zap.Field {
+	zapFields := make([]zap.Field, 0, len(fields))
+	for _, f := range fields {
+		zapFields = append(zapFields, zap.Any(f.Key, f.Value))
+	}
+	return zapFields
 }
