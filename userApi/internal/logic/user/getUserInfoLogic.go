@@ -33,8 +33,10 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 	userResponse, err := l.svcCtx.UserRpc.GetUser(context.Background(), &user.IdRequest{
 		Id: strconv.FormatInt(req.Id, 10),
 	})
+	logx.Infof("get token content: %#v error: %s \n ", userResponse, err.Error())
 	if err != nil {
 		return nil, err
+		//return nil, errors.Wrapf(err, "req: %+v", req)
 	}
 	return &types.GetUserInfoResp{
 		Message: "success",
