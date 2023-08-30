@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 	"go-zero/mall/user/internal/config"
 	"go-zero/mall/user/internal/server"
 	"go-zero/mall/user/internal/svc"
 	"go-zero/mall/user/types/user"
+	"rpc-common/log/zapx"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -31,6 +33,10 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+
+	writer, err := zapx.InitLogger()
+	logx.Must(err)
+	logx.SetWriter(writer)
 
 	//rpc log,grpc的全局拦截器
 	s.AddUnaryInterceptors(svc.LoggerInterceptor)

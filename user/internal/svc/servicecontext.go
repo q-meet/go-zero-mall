@@ -32,16 +32,16 @@ func LoggerInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySer
 		causeErr := errors.Cause(err)                  // err类型
 		if e, ok := causeErr.(*errorx.CodeError); ok { //自定义错误类型
 			logx.WithContext(ctx).Errorf("【RPC-SRV-ERR】 %+v", err)
-			logx.Infof("【RPC-SRV-ERR】 %+v", err)
+			//logx.Infof("【RPC-SRV-ERR】 %+v", err)
 			//转成 grpc err
 			err = status.Error(codes.Code(e.GetErrCode()), err.Error()) // e.GetErrMsg())
 		} else if e, ok := causeErr.(*errorx.BizError); ok { //自定义错误类型
 			logx.WithContext(ctx).Errorf("【RPC-SRV-ERR】 %+v", err)
-			logx.Infof("【RPC-SRV-ERR】 %+v", err)
+			//logx.Infof("【RPC-SRV-ERR】 %+v", err)
 			//转成 grpc err
 			err = status.Error(codes.Code(e.GetCode()), err.Error()) // e.GetErrMsg())
 		} else {
-			logx.Infof("【RPC-SRV-ERR】 %+v", err)
+			//logx.Infof("【RPC-SRV-ERR】 %+v", err)
 			logx.WithContext(ctx).Errorf("【RPC-SRV-ERR】 %+v", err)
 		}
 	}

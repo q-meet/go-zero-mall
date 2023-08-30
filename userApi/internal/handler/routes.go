@@ -21,14 +21,14 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	// 全局中间件
-	// server.Use(serverCtx.UserMiddleware.GlobalHandler)
+	server.Use(serverCtx.ExampleMiddleware.GlobalHandler)
 	//  定义错误
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, interface{}) {
 		rpcError,ok := status.FromError(err)
-		logx.Info("rpcError,ok:",rpcError, ok)
-		logx.Info("rpcError string,ok:",err.Error(), ok)
+		logx.WithContext(ctx).Info("rpcError,ok:",rpcError, ok)
+		logx.WithContext(ctx).Info("rpcError string,ok:",err.Error(), ok)
 		if ok {
-			return http.StatusOK, errorx.New(int(rpcError.Code()), rpcError.Message()).Data()
+			return http.StatusOK, errorx.New(uint32(rpcError.Code()), rpcError.Message()).Data()
 		}
 		switch e := err.(type) {
 		case *errorx.BizError:

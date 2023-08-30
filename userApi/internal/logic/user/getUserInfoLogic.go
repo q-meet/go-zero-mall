@@ -30,10 +30,11 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 	// todo: add your logic here and delete this line
 	value := l.ctx.Value("userId")
 	logx.Infof("get token content: %s \n ", value)
-	userResponse, err := l.svcCtx.UserRpc.GetUser(context.Background(), &user.IdRequest{
+	logx.WithContext(l.ctx).Infof("get token content: %s \n ", value)
+	userResponse, err := l.svcCtx.UserRpc.GetUser(l.ctx, &user.IdRequest{
 		Id: strconv.FormatInt(req.Id, 10),
 	})
-	logx.Infof("get token content: %#v error: %s \n ", userResponse, err.Error())
+	logx.WithContext(l.ctx).Infof("get token content: %#v error: %s \n ", userResponse, err.Error())
 	if err != nil {
 		return nil, err
 		//return nil, errors.Wrapf(err, "req: %+v", req)

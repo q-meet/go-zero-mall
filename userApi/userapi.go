@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
+	"rpc-common/log/zapx"
 
 	"go-zero/mall/user/Api/internal/config"
 	"go-zero/mall/user/Api/internal/handler"
@@ -23,9 +25,15 @@ func main() {
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
+	//writer, err := zapx.NewZapWriter()
+	writer, err := zapx.InitLogger()
+	logx.Must(err)
+	logx.SetWriter(writer)
+
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	logx.Infof("Starting server at %s:%d...\n", c.Host, c.Port)
+	logx.Infow(fmt.Sprintf("Starting server at %s:%d...\n", c.Host, c.Port), logx.Field("host", c.Host))
 	server.Start()
 }

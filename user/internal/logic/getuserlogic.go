@@ -33,6 +33,7 @@ func (l *GetUserLogic) GetUser(in *user.IdRequest) (*user.UserResponse, error) {
 	}
 	if in.Id == "1" {
 		//return nil, errorx.ParamsError
+		logx.WithContext(l.ctx).Infof(errors.Wrapf(errorx.ParamsError, "用户已经存在 mobile:%s,err:%v", "in.Mobile, err", "22").Error())
 		return nil, errors.Wrapf(errorx.ParamsError, "用户已经存在 mobile:%s,err:%v", "in.Mobile, err", "22")
 	}
 	id, _ := strconv.ParseInt(in.Id, 10, 64)
