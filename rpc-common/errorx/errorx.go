@@ -19,7 +19,6 @@ func New(code uint32, msg string) *BizError {
 	}
 }
 
-// 返回给前端的错误码
 func (e *BizError) GetCode() uint32 {
 	return e.Code
 }

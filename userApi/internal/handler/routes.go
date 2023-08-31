@@ -2,14 +2,7 @@
 package handler
 
 import (
-	"context"
-	"fmt"
-	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/rest/httpx"
-	"google.golang.org/grpc/status"
 	"net/http"
-	"rpc-common/errorx"
 
 	login "go-zero/mall/user/Api/internal/handler/login"
 	user "go-zero/mall/user/Api/internal/handler/user"
@@ -22,6 +15,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	// 全局中间件
 	server.Use(serverCtx.ExampleMiddleware.GlobalHandler)
 	//  定义错误
+	/*
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, interface{}) {
 		if rpcError,ok := status.FromError(err);ok {
 			logx.WithContext(ctx).Info("rpcError,ok:",rpcError, ok)
@@ -40,7 +34,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		default:
 			return http.StatusInternalServerError, nil
 		}
-	})
+	})*/
 
 	server.AddRoutes(
 		[]rest.Route{
