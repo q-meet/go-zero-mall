@@ -2,12 +2,22 @@ package login
 
 import (
 	"context"
-
+	"fmt"
+	"github.com/dtm-labs/dtm/client/dtmgrpc"
+	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logx"
 	"go-zero/mall/user/Api/internal/svc"
 	"go-zero/mall/user/Api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"go-zero/mall/user/types/user"
+	"go-zero/mall/userscore/types/userscore"
+	// 下面这行导入gozero的dtm驱动
+	_ "github.com/dtm-labs/driver-gozero"
 )
+
+// dtm已经通过前面的配置，注册到下面这个地址，因此在dtmgrpc中使用该地址
+var dtmServer = "etcd://localhost:2379/dtmservice"
+
+//var dtmServer = "http://localhost:36789/api/dtmsvr"
 
 type RegisterLogic struct {
 	logx.Logger
@@ -24,7 +34,73 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterResp, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	gid := dtmgrpc.MustGenGid(dtmServer)
+	l.WithContext(l.ctx).Info("gid:" + gid)
+	//消息型
+	msgGrpc := dtmgrpc.NewSagaGrpc(dtmServer, gid)
+	userRequest := &user.UserRequest{
+		Name:   req.Username,
+		Gender: req.Gender,
+	}
+	userServer, err := l.svcCtx.Config.UserRpc.BuildTarget()
+	if err != nil {
+		return nil, err
+	}
+	userScoreServer, err := l.svcCtx.Config.UserScoreRpc.BuildTarget()
+	if err != nil {
+		return nil, err
+	}
+	msgGrpc.Add(userServer+"/user.User/SaveUser", userServer+"/user.User/saveUserCallback", userRequest)
+	//userResponse, err := l.svcCtx.UserRpc.SaveUser(context.Background(), userRequest)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//userId, _ := strconv.ParseInt(userResponse.Id, 10, 64)
+	scoreRequest := &userscore.UserScoreRequest{
+		UserId: 100,
+		Score:  10,
+	}
+	msgGrpc.Add(userScoreServer+"/userscore.Userscore/SaveUserScore", "", scoreRequest)
+	//score, err := l.svcCtx.UserScoreRpc.SaveUserScore(context.Background(), scoreRequest)
+	//if err != nil {
+	//	return nil, err
+	//}
+	msgGrpc.WaitResult = true
+	err = msgGrpc.Submit()
+	if err != nil {
+		fmt.Println("-----------------------")
+		fmt.Println(err)
+		return nil, errors.New(err.Error())
+	}
+	//logx.Infof("register add score %d", score.Score)
+	return &types.RegisterResp{
+		//Id:   ,
+		Name: req.Username,
+	}, nil
 }
+
+/*
+func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterResp, err error) {
+	// todo: add your logic here and delete this line
+	userResponse, err := l.svcCtx.UserRpc.SaveUser(l.ctx, &user.UserRequest{
+		Name:   req.Username,
+		Gender: req.Gender,
+	})
+	if err != nil {
+		return nil, err
+	}
+	userId, _ := strconv.ParseInt(userResponse.Id, 10, 64)
+	scoreRequest := &userscore.UserScoreRequest{
+		UserId: userId,
+		Score:  10,
+	}
+	score, err := l.svcCtx.UserScoreRpc.SaveUserScore(l.ctx, scoreRequest)
+	if err != nil {
+		return nil, err
+	}
+	logx.WithContext(l.ctx).Infof("register add score %d", score.Score)
+	return &types.RegisterResp{
+		Id:   userId,
+		Name: req.Username,
+	}, nil
+}*/

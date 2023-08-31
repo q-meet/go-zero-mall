@@ -3,12 +3,11 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
-	"google.golang.org/grpc/status"
-
-	//"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	//"google.golang.org/grpc/status"
+	"google.golang.org/grpc/status"
 	"net/http"
 	"rpc-common/errorx"
 
@@ -24,12 +23,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.Use(serverCtx.ExampleMiddleware.GlobalHandler)
 	//  定义错误
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, interface{}) {
-		rpcError,ok := status.FromError(err)
-		logx.WithContext(ctx).Info("rpcError,ok:",rpcError, ok)
-		logx.WithContext(ctx).Info("rpcError string,ok:",err.Error(), ok)
-		if ok {
+		if rpcError,ok := status.FromError(err);ok {
+			logx.WithContext(ctx).Info("rpcError,ok:",rpcError, ok)
+			logx.WithContext(ctx).Info("rpcError string,ok:",err.Error(), ok)
 			return http.StatusOK, errorx.New(uint32(rpcError.Code()), rpcError.Message()).Data()
 		}
+
+		causeErr := errors.Cause(err) // err类型
+
+		fmt.Printf("%#v",err)
+		fmt.Printf("%#v",causeErr)
+		//errors.errorStrin
 		switch e := err.(type) {
 		case *errorx.BizError:
 			return http.StatusOK, e.Data()
@@ -37,45 +41,37 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			return http.StatusInternalServerError, nil
 		}
 	})
+
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{
-				serverCtx.ExampleMiddleware.RegAndLoginHandler,
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/login",
+				Handler: login.LoginHandler(serverCtx),
 			},
-			[]rest.Route{
-				{
-					Method:  http.MethodPost,
-					Path:    "/user/login",
-					Handler: login.LoginHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/user/register",
-					Handler: login.RegisterHandler(serverCtx),
-				},
-			}...
-			),
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/register",
+				Handler: login.RegisterHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/v1"),
 	)
 
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.ExampleMiddleware.Handle},
-			[]rest.Route{
-				{
-					Method:  http.MethodPost,
-					Path:    "/user/info",
-					Handler: user.GetUserInfoHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/user/info/update",
-					Handler: user.UpdateUserInfoHandler(serverCtx),
-				},
-			}...,
-		),
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/info",
+				Handler: user.GetUserInfoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/info/update",
+				Handler: user.UpdateUserInfoHandler(serverCtx),
+			},
+		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/v1"),
 	)
-
 }

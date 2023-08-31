@@ -39,4 +39,5 @@ service User {
   rpc getUser(IdRequest) returns(UserResponse);
   rpc Login(LoginRequest) returns(UserResponse);
   rpc SaveUser(UserRequest) returns(UserResponse);
+  rpc saveUserCallback(UserRequest) returns(UserResponse);
 }

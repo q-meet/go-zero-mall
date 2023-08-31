@@ -6,6 +6,11 @@ UserRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: user.rpc
+UserScoreRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: userscore.rpc
 Auth:
   AccessSecret: "!@#$#@asdasds"
   AccessExpire: 604800

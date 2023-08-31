@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	User_Ping_FullMethodName     = "/user.User/Ping"
-	User_GetUser_FullMethodName  = "/user.User/getUser"
-	User_Login_FullMethodName    = "/user.User/Login"
-	User_SaveUser_FullMethodName = "/user.User/SaveUser"
+	User_Ping_FullMethodName             = "/user.User/Ping"
+	User_GetUser_FullMethodName          = "/user.User/getUser"
+	User_Login_FullMethodName            = "/user.User/Login"
+	User_SaveUser_FullMethodName         = "/user.User/SaveUser"
+	User_SaveUserCallback_FullMethodName = "/user.User/saveUserCallback"
 )
 
 // UserClient is the client API for User service.
@@ -33,6 +34,7 @@ type UserClient interface {
 	GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	SaveUserCallback(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type userClient struct {
@@ -79,6 +81,15 @@ func (c *userClient) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *userClient) SaveUserCallback(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, User_SaveUserCallback_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
@@ -87,6 +98,7 @@ type UserServer interface {
 	GetUser(context.Context, *IdRequest) (*UserResponse, error)
 	Login(context.Context, *LoginRequest) (*UserResponse, error)
 	SaveUser(context.Context, *UserRequest) (*UserResponse, error)
+	SaveUserCallback(context.Context, *UserRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -105,6 +117,9 @@ func (UnimplementedUserServer) Login(context.Context, *LoginRequest) (*UserRespo
 }
 func (UnimplementedUserServer) SaveUser(context.Context, *UserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveUser not implemented")
+}
+func (UnimplementedUserServer) SaveUserCallback(context.Context, *UserRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveUserCallback not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -191,6 +206,24 @@ func _User_SaveUser_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_SaveUserCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).SaveUserCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_SaveUserCallback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).SaveUserCallback(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -213,6 +246,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveUser",
 			Handler:    _User_SaveUser_Handler,
+		},
+		{
+			MethodName: "saveUserCallback",
+			Handler:    _User_SaveUserCallback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

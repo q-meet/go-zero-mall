@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package userscore;
+option go_package="./userscore";
+
+message Request {
+  string ping = 1;
+}
+
+message Response {
+  string pong = 1;
+}
+
+message UserScoreRequest {
+  int64 UserId = 1;
+  int64 Score = 2;
+}
+
+message UserScoreResponse {
+  int64 UserId = 1;
+  int64 Score = 2;
+  string Name = 3;
+}
+
+service Userscore {
+  rpc Ping(Request) returns(Response);
+  rpc SaveUserScore(UserScoreRequest) returns(UserScoreResponse);
+}

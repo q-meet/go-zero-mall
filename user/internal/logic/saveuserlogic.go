@@ -31,7 +31,7 @@ func (l *SaveUserLogic) SaveUser(in *user.UserRequest) (*user.UserResponse, erro
 		Name:   in.GetName(),
 		Gender: in.GetGender(),
 	}
-	err := l.svcCtx.UserRepo.Save(context.Background(), data)
+	err := l.svcCtx.UserRepo.Save(l.ctx, data)
 	if err != nil {
 		return nil, err
 	}

@@ -25,6 +25,7 @@ type (
 		GetUser(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*UserResponse, error)
 		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponse, error)
 		SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+		SaveUserCallback(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	}
 
 	defaultUser struct {
@@ -56,4 +57,9 @@ func (m *defaultUser) Login(ctx context.Context, in *LoginRequest, opts ...grpc.
 func (m *defaultUser) SaveUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	client := user.NewUserClient(m.cli.Conn())
 	return client.SaveUser(ctx, in, opts...)
+}
+
+func (m *defaultUser) SaveUserCallback(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	client := user.NewUserClient(m.cli.Conn())
+	return client.SaveUserCallback(ctx, in, opts...)
 }
