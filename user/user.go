@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -42,8 +43,20 @@ func main() {
 	//rpc log,grpc的全局拦截器
 	s.AddUnaryInterceptors(svc.LoggerInterceptor)
 
+	s.AddUnaryInterceptors(exampleUnaryInterceptor)
+	s.AddStreamInterceptors(exampleStreamInterceptor)
+
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
+}
+
+func exampleUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	// TODO: fill your logic here
+	return handler(ctx, req)
+}
+func exampleStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	// TODO: fill your logic here
+	return handler(srv, ss)
 }

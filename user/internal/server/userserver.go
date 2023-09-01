@@ -29,7 +29,7 @@ func (s *UserServer) Ping(ctx context.Context, in *user.Request) (*user.Response
 
 func (s *UserServer) GetUser(ctx context.Context, in *user.IdRequest) (*user.UserResponse, error) {
 	l := logic.NewGetUserLogic(ctx, s.svcCtx)
-	return l.GetUser(in)
+	return l. GetUser(in)
 }
 
 func (s *UserServer) Login(ctx context.Context, in *user.LoginRequest) (*user.UserResponse, error) {

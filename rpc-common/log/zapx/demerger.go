@@ -36,6 +36,7 @@ func getEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	encoderConfig.StacktraceKey = "Stacktrace"
 	return zapcore.NewJSONEncoder(encoderConfig)
 	//return zapcore.NewConsoleEncoder(encoderConfig)
 }
