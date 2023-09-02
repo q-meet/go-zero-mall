@@ -70,13 +70,6 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLogWriter() {
-	/*
-		Filename: 日志文件的位置
-		MaxSize：在进行切割之前，日志文件的最大大小（以MB为单位）
-		MaxBackups：保留旧文件的最大个数
-		MaxAges：保留旧文件的最大天数
-		Compress：是否压缩/归档旧文件
-	*/
 	f := func(fN string) zapcore.WriteSyncer {
 		logf, _ := rotatelogs.New(
 			"logs"+sp+fN+".%Y_%m%d.log",
@@ -95,6 +88,13 @@ func getLogWriter() {
 	warnWS = f(WarnFileName)
 	infoWS = f(InfoFileName)
 	debugWS = f(DebugFileName)
+	/*
+		Filename: 日志文件的位置
+		MaxSize：在进行切割之前，日志文件的最大大小（以MB为单位）
+		MaxBackups：保留旧文件的最大个数
+		MaxAges：保留旧文件的最大天数
+		Compress：是否压缩/归档旧文件
+	*/
 	/*
 		   lumberJackLogger := &lumberjack.Logger{
 				   Filename:   "./test.log",
