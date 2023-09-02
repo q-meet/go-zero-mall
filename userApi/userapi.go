@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
-	"go-zero/mall/user/Api/internal/middleware"
 	"rpc-common/log/zapx"
 
 	"go-zero/mall/user/Api/internal/config"
@@ -26,7 +25,6 @@ func main() {
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
-	//writer, err := zapx.NewZapWriter()
 	writer, err := zapx.InitLogger()
 	//writer, err := zapx.NewCore()
 	logx.Must(err)
@@ -34,8 +32,6 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-
-	middleware.BizTraceHandler()
 
 	logx.Infof("Starting server at %s:%d...\n", c.Host, c.Port)
 	logx.Infow(fmt.Sprintf("Starting server at %s:%d...\n", c.Host, c.Port), logx.Field("host", c.Host))

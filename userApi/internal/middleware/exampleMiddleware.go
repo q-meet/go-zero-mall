@@ -1,10 +1,9 @@
 package middleware
 
 import (
-	"context"
 	"github.com/zeromicro/go-zero/core/logx"
-	"go.opentelemetry.io/otel/baggage"
 	"net/http"
+	"rpc-common/trace"
 	"rpc-common/util"
 )
 
@@ -18,17 +17,16 @@ func NewExampleMiddleware() *ExampleMiddleware {
 func (m *ExampleMiddleware) BizTraceHandler(next http.HandlerFunc) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		traceId := request.Header.Get("trace-id")
-		logx.WithContext(request.Context()).Info("trace-id:" + traceId)
 		if traceId == "" {
 			next.ServeHTTP(writer, request)
 			return
 		}
 
 		ctx := request.Context()
-		ctx = NewContext(ctx, traceId)
+		ctx = trace.NewContext(ctx, traceId)
 
 		request = request.WithContext(ctx)
-		logx.WithContext(request.Context()).Info("trace-id:2" + traceId)
+		logx.WithContext(request.Context()).Info("trace-id:" + traceId)
 		next.ServeHTTP(writer, request)
 	}
 }
@@ -64,9 +62,8 @@ func (*ExampleMiddleware) GlobalHandler(next http.HandlerFunc) http.HandlerFunc 
 			//ctx := context.WithValue(r.Context(), "TraceID", traceID)
 			//r = r.WithContext(ctx)
 			//WithContext(r.Context()).Info("xxxx")
-
-			ctx := logx.ContextWithFields(r.Context(), logx.Field("path", r.RequestURI), logx.Field(traceIdKey, traceID))
-			r = r.WithContext(ctx)
+			//ctx := logx.ContextWithFields(r.Context(), logx.Field("path", r.RequestURI), logx.Field(traceIdKey, traceID))
+			//r = r.WithContext(ctx)
 		}
 
 		//next = BizTraceHandler()
@@ -75,59 +72,4 @@ func (*ExampleMiddleware) GlobalHandler(next http.HandlerFunc) http.HandlerFunc 
 		next(w, r)
 		logx.WithContext(r.Context()).Info("global 后面面执行")
 	}
-}
-
-func BizTraceHandler() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			traceId := request.Header.Get("trace-id")
-			if traceId == "" {
-				next.ServeHTTP(writer, request)
-				return
-			}
-
-			ctx := request.Context()
-			ctx = NewContext(ctx, traceId)
-			request = request.WithContext(ctx)
-			next.ServeHTTP(writer, request)
-		})
-	}
-}
-
-func NewContext(ctx context.Context, traceId string) context.Context {
-	logger := logx.WithContext(ctx).WithFields(logx.Field(traceIdKey, traceId))
-
-	bg := baggage.FromContext(ctx)
-	member, err := baggage.NewMember(traceIdKey, traceId)
-	if err != nil {
-		logger.Error(err)
-		return ctx
-	}
-
-	bg, err = bg.SetMember(member)
-	if err != nil {
-		logger.Error(err)
-		return ctx
-	}
-
-	ctx = baggage.ContextWithBaggage(ctx, bg)
-
-	return ctx
-}
-
-const traceIdKey = "biz-trace-id"
-
-func FromTraceId(ctx context.Context) (string, bool) {
-	bg := baggage.FromContext(ctx)
-	member := bg.Member(traceIdKey)
-	return member.Value(), member.Key() != ""
-}
-
-func WithContext(ctx context.Context) logx.Logger {
-	traceId, ok := FromTraceId(ctx)
-	if !ok {
-		return logx.WithContext(ctx)
-	}
-
-	return logx.WithContext(ctx).WithFields(logx.Field(traceIdKey, traceId))
 }

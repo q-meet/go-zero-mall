@@ -70,8 +70,8 @@ func newServerSpan(carrier Carrier, serviceName, operationName string) tracespec
 }*/
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	// 全局中间件
-	server.Use(serverCtx.ExampleMiddleware.GlobalHandler)
 	server.Use(serverCtx.ExampleMiddleware.BizTraceHandler)
+	server.Use(serverCtx.ExampleMiddleware.GlobalHandler)
 
 	//rest.WithNotAllowedHandler()
 	/*
