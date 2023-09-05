@@ -2,16 +2,14 @@ package login
 
 import (
 	"context"
-	"fmt"
-	"github.com/dtm-labs/dtm/client/dtmgrpc"
-	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"go-zero/mall/user/Api/internal/svc"
 	"go-zero/mall/user/Api/internal/types"
 	"go-zero/mall/user/types/user"
 	"go-zero/mall/userscore/types/userscore"
+	"strconv"
 	// 下面这行导入gozero的dtm驱动
-	_ "github.com/dtm-labs/driver-gozero"
+	//_ "github.com/dtm-labs/driver-gozero"
 )
 
 // dtm已经通过前面的配置，注册到下面这个地址，因此在dtmgrpc中使用该地址
@@ -34,47 +32,47 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterResp, err error) {
-	gid := dtmgrpc.MustGenGid(dtmServer)
-	l.WithContext(l.ctx).Info("gid:" + gid)
 	//消息型
-	msgGrpc := dtmgrpc.NewSagaGrpc(dtmServer, gid)
 	userRequest := &user.UserRequest{
 		Name:   req.Username,
 		Gender: req.Gender,
 	}
-	userServer, err := l.svcCtx.Config.UserRpc.BuildTarget()
-	if err != nil {
-		return nil, err
-	}
-	userScoreServer, err := l.svcCtx.Config.UserScoreRpc.BuildTarget()
-	if err != nil {
-		return nil, err
-	}
-	msgGrpc.Add(userServer+"/user.User/SaveUser", userServer+"/user.User/saveUserCallback", userRequest)
-	//userResponse, err := l.svcCtx.UserRpc.SaveUser(context.Background(), userRequest)
+	//gid := dtmgrpc.MustGenGid(dtmServer)
+	//l.WithContext(l.ctx).Info("gid:" + gid)
+	//msgGrpc := dtmgrpc.NewSagaGrpc(dtmServer, gid)
+	//userServer, err := l.svcCtx.Config.UserRpc.BuildTarget()
 	//if err != nil {
 	//	return nil, err
 	//}
-	//userId, _ := strconv.ParseInt(userResponse.Id, 10, 64)
+	//userScoreServer, err := l.svcCtx.Config.UserScoreRpc.BuildTarget()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//msgGrpc.Add(userServer+"/user.User/SaveUser", userServer+"/user.User/saveUserCallback", userRequest)
+	userResponse, err := l.svcCtx.UserRpc.SaveUser(l.ctx, userRequest)
+	if err != nil {
+		return nil, err
+	}
+	userId, _ := strconv.ParseInt(userResponse.Id, 10, 64)
 	scoreRequest := &userscore.UserScoreRequest{
 		UserId: 100,
 		Score:  10,
 	}
-	msgGrpc.Add(userScoreServer+"/userscore.Userscore/SaveUserScore", "", scoreRequest)
-	//score, err := l.svcCtx.UserScoreRpc.SaveUserScore(context.Background(), scoreRequest)
-	//if err != nil {
-	//	return nil, err
-	//}
-	msgGrpc.WaitResult = true
-	err = msgGrpc.Submit()
+	//msgGrpc.Add(userScoreServer+"/userscore.Userscore/SaveUserScore", "", scoreRequest)
+	score, err := l.svcCtx.UserScoreRpc.SaveUserScore(l.ctx, scoreRequest)
 	if err != nil {
-		fmt.Println("-----------------------")
-		fmt.Println(err)
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
-	//logx.Infof("register add score %d", score.Score)
+	//msgGrpc.WaitResult = true
+	//err = msgGrpc.Submit()
+	//if err != nil {
+	//	fmt.Println("-----------------------")
+	//	fmt.Println(err)
+	//	return nil, errors.New(err.Error())
+	//}
+	logx.Infof("register add score %d,user_id %d", score.Score, userId)
 	return &types.RegisterResp{
-		//Id:   ,
+		Id:   userId,
 		Name: req.Username,
 	}, nil
 }
