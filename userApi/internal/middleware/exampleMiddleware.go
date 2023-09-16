@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"math/rand"
 	"net/http"
-	commonRrace "rpc-common/trace"
+	commonTrace "rpc-common/trace"
 	"rpc-common/util"
 	"time"
 )
@@ -31,7 +31,7 @@ func (m *ExampleMiddleware) BizTraceHandler(next http.HandlerFunc) http.HandlerF
 		}
 
 		ctx := request.Context()
-		ctx = commonRrace.NewContext(ctx, traceId)
+		ctx = commonTrace.NewContext(ctx, traceId)
 
 		request = request.WithContext(ctx)
 		logx.WithContext(request.Context()).Info("trace-id:" + traceId)
